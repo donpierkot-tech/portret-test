@@ -12,8 +12,7 @@ const THEMES_WITH_CHILD = ['dzieci'];
 const THEMES_NO_STEP1 = ['zwierzaki'];
 
 function getVisibleSteps() {
-  // Krok 1 warunkowy, krok 4 to upload, krok 5 to wykonanie, krok 6 to rozmiar, krok 7 to podsumowanie
-  // Numeracja kroków: 1=dlaKogo(warunkowy), 2=styl, 3=koncept, 4=upload, 5=wykonanie, 6=rozmiar(warunkowy), 7=podsumowanie
+  // Numeracja kroków: 1=dlaKogo(warunkowy), 2=koncept, 3=styl, 4=upload, 5=wykonanie, 6=rozmiar(warunkowy), 7=podsumowanie
   if (THEMES_NO_STEP1.includes(currentTheme)) {
     if (F.medium === 'digital') return [2,3,4,5,7];
     return [2,3,4,5,6,7];
@@ -116,11 +115,17 @@ async function uploadToCloudinary(file) {
   return data.secure_url;
 }
 
+// Pomocnicza — generuje src dla podglądu stylu na podstawie wybranego konceptu
+function getStylePreviewSrc(styleId) {
+  if (!F.concept) return null;
+  return `images/previews/${F.concept}-${styleId}.jpg`;
+}
+
 function renderForm() {
   const vs = getVisibleSteps();
   const totalSteps = vs.length;
 
-  // Pasek postępu — tyle kroków ile w vs
+  // Pasek postępu
   let pb = '';
   vs.forEach((stepNum, idx) => {
     const displayNum = idx + 1;
@@ -141,7 +146,6 @@ function renderForm() {
   // KROK 1: Dla kogo (warunkowy)
   if (!THEMES_NO_STEP1.includes(currentTheme)) {
     if (THEMES_WITH_CHILD.includes(currentTheme)) {
-      // Dzieci — tylko wybór płci
       html += `<div class="form-step ${F.step===1?'active':''}">
         <div class="step-heading">Portret dla...</div>
         <div class="step-subheading">Wybierz dla kogo tworzymy bajkowy portret</div>
@@ -157,7 +161,6 @@ function renderForm() {
         </div>
       </div>`;
     } else {
-      // Gen Z / Millenialsi / Klasyk — Kobieta, Mężczyzna, Para
       html += `<div class="form-step ${F.step===1?'active':''}">
         <div class="step-heading">Dla kogo jest portret?</div>
         <div class="step-subheading">Wybierz osobę, którą sportretujemy</div>
@@ -171,37 +174,8 @@ function renderForm() {
     }
   }
 
-  // KROK 2: Styl
-  const primaryStyles = STYLES[currentTheme] || STYLES.genz;
-  const otherThemes = Object.keys(STYLES).filter(t=>t!==currentTheme);
+  // KROK 2: Koncept (TERAZ PRZED STYLEM)
   html += `<div class="form-step ${F.step===2?'active':''}">
-    <div class="step-heading">Wybierz styl portretu</div>
-    <div class="step-subheading">Style dopasowane do estetyki ${THEME_NAMES[currentTheme]}</div>
-    <div class="opt-grid wide">${primaryStyles.map(s=>`
-      <div class="opt-card ${F.style===s.id?'selected':''}" onclick="selectStyle('${s.id}')">
-        <div class="style-preview">podgląd stylu</div>
-        <div class="opt-label">${s.name}</div>
-        <div class="opt-desc">${s.desc}</div>
-      </div>`).join('')}
-    </div>
-    <button class="expand-btn" id="expandBtn" onclick="toggleExtra()">${extraStylesOpen?'Zwiń ▴':'Pokaż więcej stylów z innych motywów ▾'}</button>
-    <div class="extra-styles ${extraStylesOpen?'visible':''}" id="extraStyles">
-      ${otherThemes.map(t=>`
-        <div class="extra-styles-group">
-          <div class="extra-styles-group-label">${THEME_NAMES[t]}</div>
-          <div class="opt-grid wide">${STYLES[t].map(s=>`
-            <div class="opt-card ${F.style===s.id?'selected':''}" onclick="selectStyle('${s.id}')">
-              <div class="style-preview">podgląd stylu</div>
-              <div class="opt-label">${s.name}</div>
-              <div class="opt-desc">${s.desc}</div>
-            </div>`).join('')}
-          </div>
-        </div>`).join('')}
-    </div>
-  </div>`;
-
-  // KROK 3: Koncept
-  html += `<div class="form-step ${F.step===3?'active':''}">
     <div class="step-heading">Koncept zdjęcia</div>
     <div class="step-subheading">Jaki rodzaj ujęcia najlepiej oddaje Twój charakter?</div>
     <div class="opt-grid wide">${CONCEPTS.map(c=>`
@@ -210,6 +184,50 @@ function renderForm() {
         <div class="opt-label">${c.name}</div>
         <div class="opt-desc">${c.desc}</div>
       </div>`).join('')}
+    </div>
+  </div>`;
+
+  // KROK 3: Styl — podglądy warunkowe na podstawie wybranego konceptu
+  const primaryStyles = STYLES[currentTheme] || STYLES.genz;
+  const otherThemes = Object.keys(STYLES).filter(t=>t!==currentTheme);
+
+  const stylePreviewHint = F.concept
+    ? `Tak wygląda styl dla konceptu <strong>${CONCEPTS.find(c=>c.id===F.concept)?.name || ''}</strong>`
+    : 'Wybierz koncept w poprzednim kroku, by zobaczyć podglądy';
+
+  html += `<div class="form-step ${F.step===3?'active':''}">
+    <div class="step-heading">Wybierz styl portretu</div>
+    <div class="step-subheading">${stylePreviewHint}</div>
+    <div class="opt-grid wide">${primaryStyles.map(s=>{
+      const src = getStylePreviewSrc(s.id);
+      const previewEl = src
+        ? `<div class="style-preview" style="background-image:url('${src}');background-size:cover;background-position:center"></div>`
+        : `<div class="style-preview style-preview--placeholder">podgląd stylu</div>`;
+      return `<div class="opt-card ${F.style===s.id?'selected':''}" onclick="selectStyle('${s.id}')">
+        ${previewEl}
+        <div class="opt-label">${s.name}</div>
+        <div class="opt-desc">${s.desc}</div>
+      </div>`;
+    }).join('')}
+    </div>
+    <button class="expand-btn" id="expandBtn" onclick="toggleExtra()">${extraStylesOpen?'Zwiń ▴':'Pokaż więcej stylów z innych motywów ▾'}</button>
+    <div class="extra-styles ${extraStylesOpen?'visible':''}" id="extraStyles">
+      ${otherThemes.map(t=>`
+        <div class="extra-styles-group">
+          <div class="extra-styles-group-label">${THEME_NAMES[t]}</div>
+          <div class="opt-grid wide">${STYLES[t].map(s=>{
+            const src = getStylePreviewSrc(s.id);
+            const previewEl = src
+              ? `<div class="style-preview" style="background-image:url('${src}');background-size:cover;background-position:center"></div>`
+              : `<div class="style-preview style-preview--placeholder">podgląd stylu</div>`;
+            return `<div class="opt-card ${F.style===s.id?'selected':''}" onclick="selectStyle('${s.id}')">
+              ${previewEl}
+              <div class="opt-label">${s.name}</div>
+              <div class="opt-desc">${s.desc}</div>
+            </div>`;
+          }).join('')}
+          </div>
+        </div>`).join('')}
     </div>
   </div>`;
 
@@ -285,8 +303,8 @@ function renderForm() {
     <div class="step-subheading">Sprawdź swoje zamówienie przed dodaniem do koszyka</div>
     <div class="summary-box">
       <div class="summary-row"><span class="sr-label">Dla kogo</span><span class="sr-value">${dlaKogoLabel}</span></div>
-      <div class="summary-row"><span class="sr-label">Styl</span><span class="sr-value">${styleName}</span></div>
       <div class="summary-row"><span class="sr-label">Koncept</span><span class="sr-value">${conceptName}</span></div>
+      <div class="summary-row"><span class="sr-label">Styl</span><span class="sr-value">${styleName}</span></div>
       <div class="summary-row"><span class="sr-label">Zdjęcie</span><span class="sr-value">${photoUrl ? '✓ Przesłane' : '—'}</span></div>
       <div class="summary-row"><span class="sr-label">Wykonanie</span><span class="sr-value">${mediumName}</span></div>
       ${F.medium!=='digital'?`<div class="summary-row"><span class="sr-label">Rozmiar</span><span class="sr-value">${sizeName}</span></div>`:''}
@@ -347,8 +365,8 @@ function getStepValidation() {
     }
     return F.subject ? null : 'Wybierz dla kogo jest portret';
   }
-  if (F.step===2) return F.style ? null : 'Wybierz styl artystyczny';
-  if (F.step===3) return F.concept ? null : 'Wybierz koncept zdjęcia';
+  if (F.step===2) return F.concept ? null : 'Wybierz koncept zdjęcia';
+  if (F.step===3) return F.style ? null : 'Wybierz styl artystyczny';
   if (F.step===4) return photoUrl ? null : 'Prześlij zdjęcie aby kontynuować';
   if (F.step===5) return F.medium ? null : 'Wybierz sposób wykonania';
   if (F.step===6) return F.size ? null : 'Wybierz rozmiar';
@@ -372,7 +390,12 @@ function goPrev() {
 function selectSubject(id) { F.subject = id; renderForm(); }
 function selectChildGenderDirect(g) { F.childGender = g; renderForm(); }
 function selectStyle(id) { F.style = id; renderForm(); }
-function selectConcept(id) { F.concept = id; renderForm(); }
+function selectConcept(id) {
+  // Reset stylu przy zmianie konceptu — podglądy się zmieniają
+  if (F.concept !== id) F.style = null;
+  F.concept = id;
+  renderForm();
+}
 function selectMedium(id) {
   const prev = F.medium;
   F.medium = id;
@@ -424,7 +447,6 @@ function resetForm() {
   extraStylesOpen = false;
   cartAdded = false;
   photoUrl = null;
-  // Ustaw domyślny krok dla motywów bez kroku 1
   if (THEMES_NO_STEP1.includes(currentTheme)) F.step = 2;
   renderForm();
   scrollToForm();

@@ -57,9 +57,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content
 .btn{font-family:'DM Sans',sans-serif;font-weight:500;letter-spacing:.15em;border-radius:50px;padding:1.1rem 3.2rem;background:#8B6F5E;color:#F8F5F1;border:none;cursor:pointer;text-decoration:none;display:inline-block;font-size:.8rem;transition:all .3s}
 .btn:hover{background:#7a5f4e;transform:scale(1.03)}
 
-footer{padding:3rem 3.5rem;border-top:1px solid rgba(139,111,94,.1);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
-.footer-left{font-family:'DM Sans',sans-serif;font-size:.65rem;color:#9a918a;letter-spacing:.06em}
-.footer-right{display:flex;gap:2rem}
+footer{padding:3rem 3.5rem;border-top:1px solid rgba(139,111,94,.1);display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:2rem}
+.footer-left{display:flex;flex-direction:column;gap:.5rem}
+.footer-copy{font-family:'DM Sans',sans-serif;font-size:.65rem;color:#9a918a;letter-spacing:.06em}
+.footer-contact{display:flex;flex-direction:column;gap:.3rem}
+.footer-contact a,.footer-contact span{font-family:'DM Sans',sans-serif;font-size:.65rem;color:#9a918a;text-decoration:none;letter-spacing:.06em;transition:color .3s}
+.footer-contact a:hover{color:#8B6F5E}
+.footer-right{display:flex;flex-direction:column;gap:.3rem;text-align:right}
 .footer-right a{font-family:'DM Sans',sans-serif;font-size:.65rem;color:#9a918a;text-decoration:none;letter-spacing:.06em;transition:color .3s}
 .footer-right a:hover{color:#8B6F5E}
 
@@ -77,6 +81,8 @@ footer{padding:3rem 3.5rem;border-top:1px solid rgba(139,111,94,.1);display:flex
   .team{padding:4rem 5vw}
   .cta-section{padding:5rem 5vw}
   footer{flex-direction:column;text-align:center;padding:2rem 1.5rem}
+  .footer-right{text-align:center}
+  .footer-contact{align-items:center}
 }
 </style>
 </head>
@@ -163,11 +169,20 @@ footer{padding:3rem 3.5rem;border-top:1px solid rgba(139,111,94,.1);display:flex
 </section>
 
 <footer>
-  <p class="footer-left">© 2026 Mój Personalizowany Portret — Moja Przygoda</p>
+  <div class="footer-left">
+    <p class="footer-copy">© 2026 Mój Personalizowany Portret — Moja Przygoda</p>
+    <div class="footer-contact">
+      <span>+48 000 000 000</span>
+      <span>kontakt@mojaprzygoda.pl</span>
+      <a href="#">Facebook</a>
+      <a href="#">Instagram</a>
+    </div>
+  </div>
   <div class="footer-right">
-    <a href="#">Instagram</a>
-    <a href="#">Facebook</a>
-    <a href="#">Kontakt</a>
+    <a href="regulamin.html">Regulamin</a>
+    <a href="polityka-prywatnosci.html">Polityka prywatności</a>
+    <a href="polityka-zwrotow.html">Polityka zwrotów</a>
+    <a href="faq.html">FAQ</a>
   </div>
 </footer>
 

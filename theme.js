@@ -109,7 +109,7 @@ function transitionTo(theme) {
   } else if (type === 'bone') {
     curtain.innerHTML = `
       <div class="curtain-panel curtain-zwierzaki-sky" style="transform:translateY(100%)"></div>
-      <div class="curtain-zwierzaki-bone" style="position:absolute;top:-10%;right:-10%;transform:rotate(0deg) scale(.6)">
+      <div class="curtain-zwierzaki-bone">
         <svg viewBox="0 0 180 80" width="180" height="80" xmlns="http://www.w3.org/2000/svg">
           <ellipse cx="25" cy="20" rx="20" ry="18" fill="#fff" stroke="#2C1810" stroke-width="3"/>
           <ellipse cx="25" cy="60" rx="20" ry="18" fill="#fff" stroke="#2C1810" stroke-width="3"/>
@@ -122,24 +122,13 @@ function transitionTo(theme) {
     const sky = curtain.querySelector('.curtain-zwierzaki-sky');
     const bone = curtain.querySelector('.curtain-zwierzaki-bone');
     sky.style.transition = 'none'; sky.style.transform = 'translateY(100%)';
-    bone.style.transition = 'none';
-    bone.style.top = '-10%'; bone.style.right = '-10%'; bone.style.left = 'auto'; bone.style.bottom = 'auto';
-    bone.style.transform = 'rotate(0deg) scale(.6)';
+    bone.style.transition = 'none'; bone.style.transform = 'translate(120vw,-20vh) scale(.5) rotate(-15deg)';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       sky.style.transition = 'transform .6s cubic-bezier(.76,0,.24,1)';
       sky.style.transform = 'translateY(0%)';
-      // Parabolic arc: top-right to bottom-left with 720deg rotation
-      bone.style.transition = 'top 1.1s cubic-bezier(.45,.05,.55,.95) .15s, left 1.1s cubic-bezier(.45,.05,.55,.95) .15s, right 1.1s cubic-bezier(.45,.05,.55,.95) .15s, bottom 1.1s cubic-bezier(.45,.05,.55,.95) .15s, transform 1.1s cubic-bezier(.45,.05,.55,.95) .15s';
-      bone.style.top = 'auto'; bone.style.right = 'auto';
-      bone.style.left = '50%'; bone.style.bottom = '50%';
-      bone.style.transform = 'translate(-50%,50%) rotate(360deg) scale(1.1)';
+      bone.style.transition = 'transform 1s cubic-bezier(.22,1,.36,1) .2s';
+      bone.style.transform = 'translate(-50%,-50%) scale(1) rotate(-5deg)';
     }));
-    // Second leg of the arc after a pause in center
-    setTimeout(()=>{
-      bone.style.transition = 'top .8s cubic-bezier(.45,.05,.55,.95), left .8s cubic-bezier(.45,.05,.55,.95), bottom .8s cubic-bezier(.45,.05,.55,.95), transform .8s cubic-bezier(.45,.05,.55,.95)';
-      bone.style.left = '-15%'; bone.style.bottom = '-10%';
-      bone.style.transform = 'translate(0,0) rotate(720deg) scale(.5)';
-    }, 1000);
     setTimeout(()=>{
       document.body.setAttribute('data-theme', theme);
       currentTheme = theme;
@@ -149,12 +138,13 @@ function transitionTo(theme) {
       window.scrollTo(0,0);
       setTimeout(()=>{
         document.getElementById('pageContent').classList.remove('hiding');
-        sky.style.transition='transform .5s cubic-bezier(.76,0,.24,1)';
-        sky.style.transform='translateY(-100%)';
-        setTimeout(()=>triggerEntrance(), 200);
-        setTimeout(()=>{ curtain.innerHTML=''; isTransitioning=false; }, 800);
+        bone.style.transition = 'transform .8s cubic-bezier(.76,0,.24,1)';
+        bone.style.transform = 'translate(-120vw,-30vh) scale(.5) rotate(15deg)';
+        setTimeout(()=>{ sky.style.transition='transform .5s cubic-bezier(.76,0,.24,1)'; sky.style.transform='translateY(-100%)'; }, 300);
+        setTimeout(()=>triggerEntrance(), 400);
+        setTimeout(()=>{ curtain.innerHTML=''; isTransitioning=false; }, 1200);
       }, 350);
-    }, 1100);
+    }, 900);
 
   } else if (type === 'theater') {
     curtain.innerHTML = classes.map(c=>`<div class="curtain-panel ${c}"></div>`).join('');
